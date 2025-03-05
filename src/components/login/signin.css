@@ -1,3 +1,34 @@
+.password-input-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  
+
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  border-radius: 100px;
+  color: #323332;
+  cursor: pointer;
+  font-size: 20px;
+  width: 50px;
+  height: 50px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease, background-color 0.3s ease;
+
+  
+
+}
+.toggle-password:hover {
+ background-color: #6d696925;
+ 
+}
 
 .login-background {
   display: flex;
@@ -35,7 +66,13 @@
   .form-group {
     margin-bottom: 30px;
     margin-right: 20px;
-
+    display: flex; /* Use flexbox for alignment */
+    flex-direction: column; /* Stack label and input vertically */
+  }
+  h1{
+    margin: 0;
+    margin-bottom: 20px;
+    
   }
   
   label {
@@ -45,21 +82,26 @@
   }
   
   input {
-    width: 100%;
-    padding: 10px;
+    width: 90%;
+    min-height: 40px;
+    padding: 10px 40px 10px 10px;
     border: 1px solid #454444;
     border-radius: 3px;
+    font-size: 16px;
   }
   
-  button {
-    width: 100%;
-    height: 40px;
+  .buttonsignin {
+    width: 96%;
+    height: 60px;
     padding: 10px;
     background-color: #06ac1c;
-    color: white;
+    color: rgb(245, 238, 238);
     border: none;
-    border-radius: 3px;
+    font-weight: bold;
+    border-radius: 6px;
+    font-size: 16px;
     cursor: pointer;
+    margin-top: 20px;
   }
   
   button:hover {

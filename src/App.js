@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import History from './components/login/History'; // Import History component
-import HomePage from './components/login/home'; // Import HomePage component
+import Sidebar from './components/login/sidebar'; // Import Sidebar component
+import Guidelines from './components/login/guidelines'; // Import History component
+
 import Login from './components/login/signin'; // Import Login component
 import Alert from './components/login/alert'; // Import Alert component
-import MapView from './components/MapView'; // Import MapView component
-import Profile from './components/login/profile'; // Import Profile component
+
+import Settings from './components/login/settings'; // Import settings component
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,31 +37,11 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Protected routes */}
-        <Route
-          path="/"
-          element={<ProtectedRoute element={HomePage} />}
-        />
-        <Route
-          path="/history"
-          element={<ProtectedRoute element={History} />}
-        />
-        <Route
-          path="/home"
-          element={<ProtectedRoute element={HomePage} />}
-        />
-        <Route
-          path="/alert"
-          element={<ProtectedRoute element={Alert} />}
-        />
-        <Route
-          path="/map"
-          element={<ProtectedRoute element={MapView} />}
-        />
-        <Route
-          path="/profile"
-          element={<ProtectedRoute element={Profile} />}
-        />
+        <Route path="/" element={<ProtectedRoute element={Sidebar} />}>
+          <Route path="/guidelines" element={<ProtectedRoute element={Guidelines} />} />
+          <Route path="/" element={<ProtectedRoute element={Alert} />} />
+          <Route path="/settings" element={<ProtectedRoute element={Settings} />} />
+        </Route>
 
         {/* Sign-in route */}
         <Route
@@ -77,19 +58,12 @@ function App() {
         <Route
           path="/logout"
           element={
-            <Navigate
-              to="/signin"
-              replace
-              onClick={handleLogout} // Handle logout on navigation
-            />
+            <Navigate to="/signin" replace onClick={handleLogout} />
           }
         />
 
         {/* Fallback route for unknown paths */}
-        <Route
-          path="*"
-          element={<Navigate to={isAuthenticated ? "/" : "/signin"} />}
-        />
+        <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/signin"} />} />
       </Routes>
     </Router>
   );

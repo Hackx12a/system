@@ -1,12 +1,162 @@
-/* Styles for the alert container */
-.alert-container {
-  width: 60%;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+.navbar {
+  display: flex;
+  padding: 10px;
+  background-color: #f1f1f1; /* Light background */
+  border-bottom: 1px solid #ccc; /* Bottom border */
+  cursor: pointer; /* Pointer cursor for clickable items */
 }
+
+.incident {
+  padding: 5px 10px;
+  margin: 0 5px; /* Space between items */
+  transition: color 0.3s ease, text-decoration 0.3s ease; /* Smooth transition */
+}
+
+.count {
+  padding: 1px 7px;
+  border-radius: 100px; /* Rounded corners */
+  border: 1px solid transparent; /* Default border */
+  display: inline-block; /* Ensure it only takes up necessary space */
+}
+
+/* New active class for clicked incidents */
+.incident.active {
+  color: green; /* Change text color to green when active */
+ 
+}
+
+.flagged .count {
+  color: rgb(255, 255, 255);
+  background-color: orange;
+}
+
+.accepted .count {
+  color: rgb(255, 255, 255);
+  background-color: green;
+}
+
+.declined .count {
+  color: rgb(255, 255, 255);
+  background-color: red;  
+}
+
+.resolved .count {
+  color: rgb(255, 255, 255);
+  background-color: gray;
+}
+.all .count {
+  color: rgb(255, 255, 255);
+  background-color: rgb(68, 143, 241);
+}
+
+.navbar span {
+  position: relative; /* Set position to relative for the underline */
+}
+
+.navbar span:hover {
+  color: green; /* Change text color on hover */
+}
+
+.navbar span.active::after {
+  content: ""; /* Create a pseudo-element for the underline */
+  position: absolute; /* Position it absolutely */
+  left: 0; /* Align it to the left */
+  right: 0; /* Stretch it to the right */
+  bottom: -10px; /* Adjust this value to move the underline lower */
+  height: 2px; /* Height of the underline */
+  background-color: green; /* Color of the underline */
+}
+
+.incident {
+  font-size: 16px; /* Adjust the font size as needed */
+  padding: 5px 10px; /* Space around text */
+  margin: 0 5px; /* Space between items */
+  transition: color 0.3s ease; /* Smooth transition for color */
+}
+/* Other existing styles remain unchanged */
+
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  margin: 20px 0;
+}
+
+.icon {
+  cursor: pointer;
+  padding: 10px;
+  font-size: 15px;
+}
+
+.page-number {
+  
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-color: #254d25;
+  padding: 1px 8px;
+}
+
+.page-number.active {
+  font-weight: 600;
+  
+}
+
+.validate-button {
+  height: 45px;
+  margin-left: 10px; /* Add some space between buttons */
+  background-color: green; /* Green background */
+  color: white; /* White text */
+  border: none; /* No border */
+  padding: 5px; /* Padding */
+  border-radius: 5px; /* Rounded corners */
+  width: 100px;
+  font-weight: bold;
+  cursor: pointer; /* Pointer cursor on hover */
+  margin-right: 10px;
+  font-size: 15px;
+}
+
+.validate-button:hover {
+  background-color: #1b551e; /* Darker green on hover */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.unread {
+  background-color: #f9f9f9; /* Light background for unread notifications */
+}
+
+.read {
+  background-color: #e0e0e0; /* Grey background for read notifications */
+}
+
+.alert-container {
+  max-width: 90%;
+  height: auto;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  font-weight: 500;
+}
+
 
 /* Styles for the notification list */
 ul {
@@ -18,12 +168,10 @@ ul {
 li {
   padding: 15px;
   margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #fff;
+  
 }
 
 /* Style for read notifications */
@@ -36,10 +184,14 @@ li {
   font-weight: bold;
 }
 
+
 /* Button styled exactly like 'Details' */
-button {
-  padding: 10px 20px;  /* Adjust padding to match 'Details' button */
+.resolve-button, .share-button, .decline-button, .accept-button{
+  padding: 5px;  /* Adjust padding to match 'Details' button */
   font-size: 14px;
+  width: 100px;
+  height: 45px;
+  margin: 12px;
   font-weight: bold;
   background-color: #1e293b; /* Dark blue like the 'Details' button */
   color: white;
@@ -50,18 +202,20 @@ button {
 }
 
 .view-button {
-  padding: 6px 12px; /* Make it smaller */
-  font-size: 13px; /* Adjust font size */
+  padding: 5px; /* Make it smaller */
+  font-size: 15px; /* Adjust font size */
   font-weight: bold;
-  background: #00ff00; /* Green color */
+  background: green; /* Green color */
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
   text-align: center;
-  width: auto; /* Prevent stretching */
+  width: 100px; /* Prevent stretching */
   min-width: 70px; /* Small fixed width */
   display: inline-block; /* Prevent full-width stretching */
+  margin-left: 10px;
+  height: 45px;
 }
 
 .view-button:hover {
@@ -116,11 +270,48 @@ button {
   margin-bottom: 10px;
 }
 
+
+
+@keyframes blink {
+  0% {
+      opacity: 1;
+  }
+  50% {
+      opacity: 0.5;
+  }
+  100% {
+      opacity: 1;
+  }
+}
+
+/* Alert modal styling */
+.alertmodal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 500px;
+  position: relative;
+  animation: blink 1s infinite; /* Apply blinking animation */
+}
+
+
+
+.alertbutton{
+  background: rgb(247, 33, 5);
+  color: white;
+  padding: 5px 15px;
+  border: none;
+  height: 40px;
+  width: 100px;
+  border-radius: 5px;
+  cursor: pointer;
+}
 .modal-image {
-  width: 100%;
+  width: 90%;
   max-height: 300px;
   border-radius: 5px;
-  object-fit: cover;
+  
 }
 
 .accept-button {
@@ -153,3 +344,39 @@ button {
   height: 25px;
   cursor: pointer;
 }
+
+
+/* General styles for the status text */
+.status-text {
+  display: inline-block; /* Allows padding and borders to work properly */
+  padding: 2px 7px; /* Add some padding */
+  border-radius: 4px; /* Optional: Add rounded corners */
+}
+
+/* Specific border styles based on status */
+.status-flagged {
+  border: 2px solid orange; /* High severity */
+  background-color: orange;
+  color: white;
+}
+
+.status-accepted {
+  border: 2px solid green; /* Accepted */
+  background-color: green;
+  color: white;
+}
+
+.status-declined {
+  border: 2px solid red;
+  background-color: red; /* Declined */
+  color: white;
+}
+
+.status-resolved {
+  border: 2px solid gray; 
+  background-color: gray;
+  color: white;
+ 
+
+}
+

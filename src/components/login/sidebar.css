@@ -1,0 +1,128 @@
+/* General Styles */
+
+/* Sidebar Styles */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background-color: #03ac3b;
+  height: 100vh; /* Full height */
+  width: 200px; /* Adjusted width of the sidebar */
+  padding: 20px;
+  position: fixed; /* Fixed position */
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease; /* Smooth transition for width */
+}
+
+.content-area {
+  flex: 1; /* Take the remaining space */
+  padding: 20px; /* Add some padding */
+  background-color: #ebf0ed; /* Example background color */
+  overflow-y: auto; /* Allow scrolling if content overflows */
+  margin-left: 200px; /* Adjust for the width of the sidebar */
+  transition: margin-left 0.3s ease; 
+}
+
+.app-layout {
+  display: flex; /* Use flexbox for layout */
+  height: 100vh; /* Full viewport height */
+}
+
+.sidebar.active {
+  transform: translateX(0); /* Show sidebar */
+}
+
+.sidebar-links {
+  list-style: none;
+  padding: 0;
+  margin-top: 50px;
+  margin-left: -5px;
+}
+
+.sidebar-links li {
+  margin: 15px 0;
+}
+
+.sidebar-links li svg {
+  margin-right: 0.5rem; 
+}
+
+.sidebar-links li a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex; /* Use flex to align items */
+  align-items: center; /* Center items vertically */
+}
+
+.sidebar-links li a:hover {
+  color: #7be77b;
+}
+
+/* Emergency button */
+.emergency-button {
+  background-color: #ff6347; /* Red for urgency */
+  padding: 15px;
+  border-radius: 5px;
+  color: white;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  margin-top: auto; /* Push to the bottom */
+}
+
+.emergency-button:hover {
+  background-color: #e5533d;
+}
+
+/* Sidebar toggle */
+.sidebar-toggle {
+  display: none; /* Initially hidden */
+  cursor: pointer;
+  font-size: 2rem; /* Font size of the arrow */
+  color: rgb(44, 126, 24); /* Arrow color */
+  border: none; /* Remove border */
+  border-radius: 250px;
+  background: white; /* Remove background */
+  position: absolute; /* Position absolutely */
+  right: -15px; /* Distance from the right edge */
+  top: 5px; /* Distance from the top edge */
+  height: 50px; /* Set height for the button */
+  width: 50px; /* Set width for the button */
+  z-index: 1000; /* Ensure it's above other content */
+}
+
+/* Mobile and Desktop Responsiveness */
+@media (max-width: 768px), (min-width: 769px) {
+  .sidebar {
+    width: 200px; /* Keep width for both mobile and desktop */
+  }
+
+  .content-area {
+    margin-left: 200px; /* Adjust for the width of the sidebar */
+  }
+
+  .sidebar-toggle {
+    display: block; /* Show toggle on both mobile and desktop */
+  }
+
+  .sidebar-closed {
+    width: 60px; /* Adjusted width when closed, showing only icons */
+  }
+
+  .sidebar-links li svg {
+    margin-right: 0.2rem; 
+    height: 20px;
+    width: 20px;
+  }
+
+  .emergency-button {
+    margin-left: -5px;
+    padding: 8px;
+  }
+
+  .sidebar-closed ~ .content-area {
+    margin-left: 70px; /* Adjust margin for content area when sidebar is closed */
+  }
+}

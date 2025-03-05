@@ -1,32 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion'; // Import motion from framer-motion
+import { motion } from 'framer-motion';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importing icons from react-icons
 import './signin.css';
-import logo from './assets/helptrack.png'; // Import your logo image
-import backgroundImage from './assets/qwe.jpg'; // Import your background image
+import logo from './assets/helptrack.png';
+import backgroundImage from './assets/qwe.jpg';
 
 const Login = ({ setIsAuthenticated }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
   const navigate = useNavigate();
 
-  // Check if the user is already authenticated on component mount
   useEffect(() => {
     const authStatus = sessionStorage.getItem('isAuthenticated');
     if (authStatus === 'true') {
-      navigate('/'); // Redirect to home page if authenticated
+      navigate('/');
     }
   }, [navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Simulate login logic
     if (email === '123@yahoo.com' && password === '123') {
       sessionStorage.setItem('isAuthenticated', 'true');
-      setIsAuthenticated(true); // Update the authentication state
-      navigate('/'); // Redirect to home page
+      setIsAuthenticated(true);
+      navigate('/');
     } else {
       setError('Invalid email or password. Please try again.');
     }
@@ -36,43 +35,37 @@ const Login = ({ setIsAuthenticated }) => {
     <div className="login-background" style={{ backgroundImage: `url(${backgroundImage})` }}>
       <motion.div
         className="login-container"
-        initial={{ opacity: 0, y: -50 }} // Initial animation state
-        animate={{ opacity: 1, y: 0 }} // Animate to visible state
-        transition={{ duration: 0.5 }} // Animation duration
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        {/* Logo */}
         <motion.img
           src={logo}
           alt="Logo"
           className="logo"
-          initial={{ opacity: 0, scale: 0.8 }} // Initial animation state
-          animate={{ opacity: 1, scale: 1 }} // Animate to visible state
-          transition={{ duration: 0.5, delay: 0.2 }} // Animation duration and delay
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         />
 
         <h1>Login</h1>
         {error && (
           <motion.p
             className="error-message"
-            initial={{ opacity: 0, y: -20 }} // Initial animation state
-            animate={{ opacity: 1, y: 0 }} // Animate to visible state
-            transition={{ duration: 0.3, delay: 0.2 }} // Animation duration and delay
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
           >
             {error}
           </motion.p>
         )}
         <motion.form
           onSubmit={handleSubmit}
-          initial={{ opacity: 0, y: 50 }} // Initial animation state
-          animate={{ opacity: 1, y: 0 }} // Animate to visible state
-          transition={{ duration: 0.5, delay: 0.3 }} // Animation duration and delay
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <motion.div
-            className="form-group"
-            initial={{ opacity: 0, x: -20 }} // Initial animation state
-            animate={{ opacity: 1, x: 0 }} // Animate to visible state
-            transition={{ duration: 0.5, delay: 0.4 }} // Animation duration and delay
-          >
+          <motion.div className="form-group">
             <label htmlFor="email">Email:</label>
             <input
               type="email"
@@ -82,28 +75,33 @@ const Login = ({ setIsAuthenticated }) => {
               required
             />
           </motion.div>
-          <motion.div
-            className="form-group"
-            initial={{ opacity: 0, x: -20 }} // Initial animation state
-            animate={{ opacity: 1, x: 0 }} // Animate to visible state
-            transition={{ duration: 0.5, delay: 0.5 }} // Animation duration and delay
-          >
+          <motion.div className="form-group">
             <label htmlFor="password">Password:</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="password-input-container">
+              <input
+                type={showPassword ? 'text' : 'password'} // Toggle input type
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                className="toggle-password"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Use React icons */}
+              </button>
+            </div>
           </motion.div>
           <motion.button
             type="submit"
-            whileHover={{ scale: 1.05 }} // Hover animation
-            whileTap={{ scale: 0.95 }} // Click animation
-            initial={{ opacity: 0, y: 20 }} // Initial animation state
-            animate={{ opacity: 1, y: 0 }} // Animate to visible state
-            transition={{ duration: 0.5, delay: 0.6 }} // Animation duration and delay
+            className="buttonsignin"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
             Login
           </motion.button>
