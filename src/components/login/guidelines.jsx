@@ -1,4 +1,8 @@
 const History = () => {
-    return <div>History Page</div>;
+    return(
+<div>
+  <title>Guidelines</title>
+  </div>
+    );
   };
   export default History;

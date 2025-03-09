@@ -310,6 +310,7 @@ const AlertNotification = () => {
     return (
         <div className="alert-container" onClick={handleUserInteraction}> {/* Main container for alerts */}
             <h2>{collectionName}</h2> {/* Display collection name */}
+            <title>Dashboard</title>
 
             {/* Modal for New Flagged Incident */}
             {showAlertModal && newFlaggedIncident && (

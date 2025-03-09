@@ -7,6 +7,7 @@ const Settings = () => {
 
   return (
       <div>
+        <title>Settings</title>
 
           <h2>{collectionNames}</h2>
       </div>
