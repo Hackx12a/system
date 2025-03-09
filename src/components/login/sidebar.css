@@ -62,18 +62,22 @@
 }
 
 /* Emergency button */
-.emergency-button {
-  background-color: #ff6347; /* Red for urgency */
-  padding: 15px;
+.buttonlogout {
+  background-color: #fa4828; /* Red for urgency */
+  padding: 8px;
   border-radius: 5px;
+  font-size: 15px;
+  font-weight: bold;
   color: white;
-  text-decoration: none;
   transition: background-color 0.3s ease;
   margin-top: auto; /* Push to the bottom */
+  cursor: pointer;
+  border: none; /* Remove default button border */
+  box-shadow: none; /* Remove shadow */
 }
 
-.emergency-button:hover {
-  background-color: #e5533d;
+.buttonlogout:hover {
+  background-color: #c72205;
 }
 
 /* Sidebar toggle */
@@ -124,5 +128,16 @@
 
   .sidebar-closed ~ .content-area {
     margin-left: 70px; /* Adjust margin for content area when sidebar is closed */
+  }
+  
+  .images {
+    height: 50px;
+    width: 100px;
+    transition: height 0.3s ease, width 0.3s ease; /* Smooth transition for size change */
+  }
+  
+  .sidebar-closed .images {
+    height: 30px; /* Smaller size when sidebar is closed */
+    width: 60px; /* Smaller size when sidebar is closed */
   }
 }

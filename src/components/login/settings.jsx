@@ -1,14 +1,18 @@
-import React from 'react';
-import AlertNotification from './alert';
+import React, { useState } from 'react';
+
 
 const Settings = () => {
-
+  const [collectionNames, setCollectionNameS]=useState("FireIncident");
+  
 
   return (
-    <div>
-      <h1>was</h1>
-    </div>
+      <div>
+
+          <h2>{collectionNames}</h2>
+      </div>
   );
 };
+
+
 
 export default Settings;
