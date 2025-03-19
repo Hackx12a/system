@@ -1,5 +1,5 @@
 .settings-container {
-    width: 800px;
+    width: 900px;
     margin: 20px auto;
     padding: 20px;
     background: white;
@@ -33,31 +33,33 @@
   .profile-header {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+
+    margin-bottom: 50px;
+    margin-top: 50px;
   }
   
   .avatar {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     background: #07e13a;
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 30px;
     font-weight: bold;
     margin-right: 10px;
   }
   
   .profile-info h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: 20px;
   }
   
   .profile-info p {
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     color: gray;
   }
   
@@ -73,7 +75,7 @@
   }
   
   input, textarea {
-    width: 100%;
+    width: 99%;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -93,5 +95,61 @@
   
   .save-btn:hover {
     background: #1bf403;
+  }
+  
+  
+
+  .password-input {
+    position: relative;
+  }
+  
+  .password-input input {
+    width: 94%;
+    padding-right: 50px; /* Adjust based on button width */
+  }
+  
+  .password-input button {
+    position: absolute;
+    right: 10px; /* Adjust based on your design */
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #007bff; /* Adjust color as needed */
+  }
+  
+  .chatbox {
+    border: 1px solid #ccc;
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .chat-messages {
+    margin-bottom: 10px;
+  }
+  
+  .chat-message {
+    margin: 5px 0;
+  }
+  
+  .chat-input {
+    display: flex;
+  }
+  
+  .chat-input input {
+    flex: 1;
+    padding: 5px;
+  }
+  
+  .chat-input button {
+    padding: 5px  20px;
+    margin-left: 10px;
+    border-color: transparent;
+    border-radius: 10%;
+    color: white;
+    background-color: #0a8118;
+    font-weight: 600;
   }
   

@@ -1,17 +1,125 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { db, auth } from './firebase'; // Adjust the path as necessary
+import { collection, query, where, getDocs, updateDoc, addDoc, onSnapshot, arrayUnion, doc } from 'firebase/firestore';
+import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import "./settings.css";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("user");
-  const [firstName, setFirstName] = useState("Prince Albert");
-  const [lastName, setLastName] = useState("Martinez");
-  const [email, setEmail] = useState("Albertgwapo@gmail.com");
-  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [adminMessage, setAdminMessage] = useState("");
-  const [adminName, setAdminName] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
+  const [setEmail, setSetEmail] = useState(sessionStorage.getItem('email'));
+  const [loading, setLoading] = useState(false); // Loading state
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false); // Show/hide current password
+  const [showNewPassword, setShowNewPassword] = useState(false); // Show/hide new password
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Show/hide confirm password
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
 
+  // Fetch user data from Firestore
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const q = query(collection(db, 'users'), where('email', '==', setEmail));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        setFirstName(data.FirstName || "");
+        setLastName(data.LastName || "");
+      });
+    };
+
+    fetchUserData();
+  }, [setEmail]);
+
+  // Function to handle saving changes
+  const handleSave = async () => {
+    if (newPassword !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    setLoading(true); // Start loading
+
+    try {
+      // Re-authenticate user
+      const user = auth.currentUser;
+      if (user) {
+        const credential = EmailAuthProvider.credential(setEmail, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+        
+        // Update Firestore for FirstName and LastName
+        const q = query(collection(db, 'users'), where('email', '==', setEmail));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (doc) => {
+          await updateDoc(doc.ref, {
+            FirstName: firstName,
+            LastName: lastName,
+          });
+        });
+
+        // Update Authentication password
+        await updatePassword(user, newPassword);
+        alert("Profile updated successfully!");
+
+        // Clear password fields
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch (error) {
+      console.error("Error updating user: ", error);
+      alert("Error updating password or user information.");
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (newMessage.trim() === "") return;
+
+    const documentId = setEmail; 
+
+    const messageData = {
+      email: setEmail,
+      message: newMessage,
+      timestamp: new Date(),
+    };
+
+    try {
+      const docRef = doc(db, 'messages', documentId);
+      await updateDoc(docRef, {
+        messages: arrayUnion(messageData)
+      });
+
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message: ", error);
+      alert("Error sending message.");
+    }
+  };
+
+  // Fetch messages in real-time
+  useEffect(() => {
+    const docRef = doc(db, 'messages', setEmail);
+    const unsubscribe = onSnapshot(docRef, (doc) => {
+      const data = doc.data();
+      if (data && data.messages) {
+        setMessages(data.messages);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [setEmail]);
+
+  const getAvatarInitials = () => {
+    const firstInitial = firstName.charAt(0).toUpperCase();
+    const lastInitial = lastName.charAt(0).toUpperCase();
+    return `${firstInitial}${lastInitial}`;
+  };
+  
   return (
     <div className="settings-container">
       {/* Tab Navigation */}
@@ -34,10 +142,10 @@ const Settings = () => {
       {activeTab === "user" && (
         <div className="user-settings">
           <div className="profile-header">
-            <div className="avatar">FP</div>
+          <div className="avatar">{getAvatarInitials()}</div>
             <div className="profile-info">
-              <h2>Prince Albert Martinez</h2>
-              <p>fire department</p>
+              <h2>{`${firstName} ${lastName}`}</h2>
+              <p>{setEmail}</p>
             </div>
           </div>
 
@@ -53,63 +161,85 @@ const Settings = () => {
 
           <div className="input-group">
             <label>Email</label>
-            <input type="email" value={email} disabled />
+            <input type="email" value={setEmail} disabled />
+          </div>
+
+          <div className="input-group">
+            <label>Current Password</label>
+            <div className="password-input">
+              <input 
+                type={showCurrentPassword ? "text" : "password"} 
+                value={currentPassword} 
+                onChange={(e) => setCurrentPassword(e.target.value)} 
+              />
+              <button onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
+                {showCurrentPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           <div className="input-group">
             <label>New Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <div className="password-input">
+              <input 
+                type={showNewPassword ? "text" : "password"} 
+                value={newPassword} 
+                onChange={(e) => setNewPassword(e.target.value)} 
+              />
+              <button onClick={() => setShowNewPassword(!showNewPassword)}>
+                {showNewPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           <div className="input-group">
             <label>Confirm Password</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            <div className="password-input">
+              <input 
+                type={showConfirmPassword ? "text" : "password"} 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+              />
+              <button onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
-          <button className="save-btn">Save</button>
+          <button className="save-btn" onClick={handleSave} disabled={loading}>
+            {loading ? "Saving..." : "Save"}
+          </button>
         </div>
       )}
 
-      {/* Contact Administrator Form */}
+        {/* Contact Administrator Chatbox */}
       {activeTab === "contact" && (
         <div className="contact-admin">
           <h3>Contact Administrator</h3>
-          <p>If you have any issues, please reach out to the administrator.</p>
-
-          <div className="input-group">
-            <label>Message</label>
-            <textarea 
-              placeholder="Type your message here..." 
-              value={adminMessage} 
-              onChange={(e) => setAdminMessage(e.target.value)}
-            ></textarea>
+          <div className="chatbox">
+            <div className="chat-messages">
+              {messages.map((msg, index) => (
+                <div key={index} className="chat-message">
+                  <strong>{msg.email}:</strong> {msg.message}
+                </div>
+              ))}
+            </div>
+            <form onSubmit={handleSendMessage} className="chat-input">
+              <input 
+                type="text" 
+                value={newMessage} 
+                onChange={(e) => setNewMessage(e.target.value)} 
+                placeholder="Type your message..." 
+                required 
+              />
+              <button type="submit">Send</button>
+            </form>
           </div>
-
-          <div className="input-group">
-            <label>Your Name</label>
-            <input 
-              type="text" 
-              placeholder="Enter your name" 
-              value={adminName} 
-              onChange={(e) => setAdminName(e.target.value)}
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Your Email</label>
-            <input 
-              type="email" 
-              placeholder="Enter your email" 
-              value={adminEmail} 
-              onChange={(e) => setAdminEmail(e.target.value)}
-            />
-          </div>
-
-          <button className="save-btn">Send Message</button>
         </div>
       )}
     </div>
   );
 };
+
 
 export default Settings;

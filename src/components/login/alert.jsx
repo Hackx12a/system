@@ -128,7 +128,7 @@ const AlertNotification = () => {
                     incidentsData.push({
                         id: doc.id, // Store document ID
                         incidentId: data.incidentId, // Store incident ID
-                        severity: data.severity, // Store severity
+                        severity: data.severity || "N/A", // Store severity
                         timestamp: formattedTimestamp, // Store formatted timestamp
                         location: data.location, // Store location
                         status: data.status, // Store status
@@ -140,7 +140,7 @@ const AlertNotification = () => {
                         setNewFlaggedIncident({
                             id: doc.id,
                             incidentId: data.incidentId,
-                            severity: data.severity,
+                            severity: data.severity || "N/A",
                             timestamp: formattedTimestamp,
                             location: data.location,
                             status: data.status,
