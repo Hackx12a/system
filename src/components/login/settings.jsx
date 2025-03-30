@@ -83,6 +83,7 @@ const Settings = () => {
     const documentId = setEmail; 
 
     const messageData = {
+      sender: firstName,
       email: setEmail,
       message: newMessage,
       timestamp: new Date(),
@@ -164,47 +165,8 @@ const Settings = () => {
             <input type="email" value={setEmail} disabled />
           </div>
 
-          <div className="input-group">
-            <label>Current Password</label>
-            <div className="password-input">
-              <input 
-                type={showCurrentPassword ? "text" : "password"} 
-                value={currentPassword} 
-                onChange={(e) => setCurrentPassword(e.target.value)} 
-              />
-              <button onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
-                {showCurrentPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-          </div>
+         
 
-          <div className="input-group">
-            <label>New Password</label>
-            <div className="password-input">
-              <input 
-                type={showNewPassword ? "text" : "password"} 
-                value={newPassword} 
-                onChange={(e) => setNewPassword(e.target.value)} 
-              />
-              <button onClick={() => setShowNewPassword(!showNewPassword)}>
-                {showNewPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-          </div>
-
-          <div className="input-group">
-            <label>Confirm Password</label>
-            <div className="password-input">
-              <input 
-                type={showConfirmPassword ? "text" : "password"} 
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-              />
-              <button onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                {showConfirmPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-          </div>
 
           <button className="save-btn" onClick={handleSave} disabled={loading}>
             {loading ? "Saving..." : "Save"}

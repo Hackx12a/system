@@ -6,6 +6,11 @@ import { GeoPoint } from "firebase/firestore"; // Import GeoPoint for handling g
 import myAudio from './assets/alarm.mp3'; // Import audio file for alerts
 import { doc, updateDoc, getDocs } from 'firebase/firestore'; // Import Firestore functions for document handling
 import { QRCodeSVG } from 'qrcode.react'; // Import QRCode component for generating QR codes
+import { FaSearch } from 'react-icons/fa';
+
+
+
+
 
 const AlertNotification = () => {
     // State variables for managing component state
@@ -28,6 +33,12 @@ const AlertNotification = () => {
     const [mapsLoaded, setMapsLoaded] = useState(false); // Tracks if Google Maps API is loaded
     const [collectionName, setCollectionName] = useState("loading....."); // Stores the name of the Firestore collection
     const userEmail = sessionStorage.getItem('email'); // Retrieves user's email from session storage
+    const [searchTerm, setSearchTerm] = useState('');
+    const [declineReason, setDeclineReason] = useState(''); // State to manage the decline reason input
+    const [declineReasonModal, setDeclineReasonModal] = useState(false); //
+  
+   
+  
 
     // Effect to fetch user data from Firestore
     useEffect(() => {
@@ -41,7 +52,7 @@ const AlertNotification = () => {
                     if (doc.data().email === userEmail) { // Check if the email matches
                         setCollectionName(doc.data().department); // Set the collection name based on user's department
                         found = true; // User found
-                        break; // Exit loop once user is found
+                        break; // Exit loop once user is found 
                     }
                 }
 
@@ -51,7 +62,7 @@ const AlertNotification = () => {
             } catch (error) {
                 console.error("Error fetching user data: ", error); // Log any errors during fetching
             }
-        };
+        }
 
         fetchUserData(); // Call the function to fetch user data
     }, [userEmail]); // Dependency array to run effect when userEmail changes
@@ -109,57 +120,63 @@ const AlertNotification = () => {
     };
 
     // Effect to fetch incidents data from Firestore and filter based on distance
-    useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, collectionName), (querySnapshot) => {
-            const incidentsData = []; // Array to store fetched incidents
-            querySnapshot.forEach((doc) => {
-                const data = doc.data(); // Get data from each document
-                const formattedTimestamp = data.timestamp 
-                    ? new Date(data.timestamp.seconds * 1000).toLocaleString() // Format timestamp to readable string
-                    : "N/A"; // Set to "N/A" if no timestamp
+useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, collectionName), (querySnapshot) => {
+        const incidentsData = []; // Array to store fetched incidents
+        querySnapshot.forEach((doc) => {
+            const data = doc.data(); // Get data from each document
+            const formattedTimestamp = data.timestamp 
+                ? new Date(data.timestamp.seconds * 1000).toLocaleString() // Format timestamp to readable string
+                : "N/A"; // Set to "N/A" if no timestamp
 
-                const incidentLocation = {
-                    latitude: data.location._lat, // Get latitude from location
-                    longitude: data.location._long, // Get longitude from location
-                };
+            const incidentLocation = {
+                latitude: data.location._lat, // Get latitude from location
+                longitude: data.location._long, // Get longitude from location
+            };
 
-                // Check if user is within 4 km of the incident
-                if (userLocation && computeDistance(userLocation, incidentLocation) <= 4) {
-                    incidentsData.push({
-                        id: doc.id, // Store document ID
-                        incidentId: data.incidentId, // Store incident ID
-                        severity: data.severity || "N/A", // Store severity
-                        timestamp: formattedTimestamp, // Store formatted timestamp
-                        location: data.location, // Store location
-                        status: data.status, // Store status
-                        image: data.image, // Store image URL
+            console.log("User Location:", userLocation);
+            console.log("Incident Location:", incidentLocation);
+            const distance = computeDistance(userLocation, incidentLocation);
+            console.log("Distance:", distance);
+
+            // Check if user is within 4 km of the incident
+            if (userLocation && distance <= 4) {
+                incidentsData.push({
+                    id: doc.id, // Store document ID
+                    incidentId: data.incidentId, // Store incident ID
+                    severity: data.severity || "N/A", // Store severity
+                    timestamp: formattedTimestamp, // Store formatted timestamp
+                    location: data.location, // Store location
+                    status: data.status, // Store status
+                    image: data.image, // Store image URL
+                });
+
+                // Check if the incident is flagged
+                if (data.status === "Flagged") {
+                    setNewFlaggedIncident({
+                        id: doc.id,
+                        incidentId: data.incidentId,
+                        severity: data.severity || "N/A",
+                        timestamp: formattedTimestamp,
+                        location: data.location,
+                        status: data.status,
+                        image: data.image,
                     });
-
-                    // Check if the incident is flagged
-                    if (data.status === "Flagged") {
-                        setNewFlaggedIncident({
-                            id: doc.id,
-                            incidentId: data.incidentId,
-                            severity: data.severity || "N/A",
-                            timestamp: formattedTimestamp,
-                            location: data.location,
-                            status: data.status,
-                            image: data.image,
-                        });
-                        setShowAlertModal(true); // Show alert modal for new flagged incident
-                        playAlertSound(); // Play alert sound for flagged incident
-                    }
+                    setShowAlertModal(true); // Show alert modal for new flagged incident
+                    playAlertSound(); // Play alert sound for flagged incident
                 }
-            });
-            setIncidents(incidentsData); // Update incidents state with fetched data
+            }
         });
+        setIncidents(incidentsData); // Update incidents state with fetched data
+    });
 
-        return () => {
-            unsubscribe(); // Unsubscribe from Firestore updates
-            audio.pause(); // Pause audio when component unmounts
-            audio.currentTime = 0; // Reset audio to start
-        };
-    }, [collectionName, audio, userLocation]); // Dependencies to rerun effect when these values change
+    return () => {
+        unsubscribe(); // Unsubscribe from Firestore updates
+        audio.pause(); // Pause audio when component unmounts
+        audio.currentTime = 0; // Reset audio to start
+    };
+}, [collectionName, audio, userLocation]); // Dependencies to rerun effect when these values change
+
 
     // Function to toggle fullscreen mode for images
     const toggleFullscreen = (imageElement) => {
@@ -203,6 +220,7 @@ const AlertNotification = () => {
         setValidateModal(false); // Close validation modal
         setDeclinedModal(false); // Close declined modal
         setShowAlertModal(false); // Close alert modal
+        setDeclineReasonModal(false);   
         audio.pause(); // Pause audio
         audio.currentTime = 0; // Reset audio to start
     };
@@ -212,7 +230,8 @@ const AlertNotification = () => {
         try {
             const docRef = doc(db, collectionName, id); // Get document reference
             await updateDoc(docRef, {
-                status: "Accepted" // Update status to "Accepted"
+                status: "Accepted", // Update status to "Accepted"
+                note: "Your report has been accepted. The responder is on the way."
             });
 
             setIncidents(incidents.map(notif => 
@@ -224,29 +243,34 @@ const AlertNotification = () => {
         }
     };
 
-    // Function to decline an incident
+
+ 
+    
+    // Function to submit the decline reason
     const handleDecline = async (id) => {
         try {
-            const docRef = doc(db, collectionName, id); // Get document reference
+            const docRef = doc(db, collectionName, id);
             await updateDoc(docRef, {
-                status: "Declined" // Update status to "Declined"
+                status: "Declined",
+                note: declineReason, // Store the decline reason in the 'note' field
             });
-
+    
             setIncidents(incidents.map(notif => 
-                notif.id === id ? { ...notif, status: "Declined" } : notif // Update incident status in state
+                notif.id === id ? { ...notif, status: "Declined" } : notif
             ));
-            closeModal(); // Close modals after declining
+            closeModal();
         } catch (error) {
-            console.error("Error declining incident: ", error); // Log error if declining fails
+            console.error("Error declining incident: ", error);
         }
     };
+
 
     // Function to resolve an incident
     const handleResolve = async (id) => {
         try {
             const docRef = doc(db, collectionName, id); // Get document reference
             await updateDoc(docRef, {
-                status: "Resolved" // Update status to "Resolved"
+                status: "Resolved", // Update status to "Resolved"
             });
 
             setIncidents(incidents.map(notif => 
@@ -291,6 +315,8 @@ const AlertNotification = () => {
         setQrCodeModal(false); // Close QR code modal
     };
 
+    
+
     // Count notifications based on their status
     const flaggedCount = incidents.filter(incident => incident.status === "Flagged").length; // Count flagged incidents
     const acceptedCount = incidents.filter(incident => incident.status === "Accepted").length; // Count accepted incidents
@@ -307,10 +333,32 @@ const AlertNotification = () => {
     const currentItems = filteredNotifications.slice(indexOfFirstItem, indexOfLastItem); // Get items for the current page
     const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage); // Calculate total pages for pagination
 
+
+
+    // Filter incidents based on the search term (only by incidentId)
+    const searchedItems = currentItems.filter(incident => 
+        incident.id?.toLowerCase()?.includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="alert-container" onClick={handleUserInteraction}> {/* Main container for alerts */}
             <h2>{collectionName}</h2> {/* Display collection name */}
             <title>Dashboard</title>
+
+   
+            <div className="search-container">
+                <input
+                    type="text"
+                    placeholder="Search incidents..."
+                    value={searchTerm} // Use searchTerm state for input value
+                    onChange={(e) => setSearchTerm(e.target.value)} // Update search term on input change
+                    className="search-bar"
+                />
+                <button className="search-button">
+                    <FaSearch /> {/* Use React Icon here */}
+                </button>
+            </div>
+
 
             {/* Modal for New Flagged Incident */}
             {showAlertModal && newFlaggedIncident && (
@@ -346,68 +394,73 @@ const AlertNotification = () => {
 
             {/* Pagination between Navbar and Table */}
             <div className="pagination"> {/* Pagination controls */}
-                <span className="icon left" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>&#9664;</span> {/* Previous page icon */}
-                {[...Array(totalPages)].map((_, index) => ( // Create page numbers based on total pages
-                    <span
-                        key={index + 1}
-                        className={`page-number ${currentPage === index + 1 ? "active" : ""}`} // Highlight current page
-                        onClick={() => setCurrentPage(index + 1)} // Set current page on click
-                    >
-                        {index + 1} {/* Display page number */}
-                    </span>
-                ))}
-                <span className="icon right" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}>&#9654;</span> {/* Next page icon */}
-            </div>
+    <span className="icon left" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>&#9664;</span> {/* Previous page icon */}
+    {[...Array(totalPages)].map((_, index) => ( // Create page numbers based on total pages
+        <span
+            key={index + 1}
+            className={`page-number ${currentPage === index + 1 ? "active" : ""}`} // Highlight current page
+            onClick={() => setCurrentPage(index + 1)} // Set current page on click
+        >
+            {index + 1} {/* Display page number */}
+        </span>
+    ))}
+    <span className="icon right" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}>&#9654;</span> {/* Next page icon */}
+</div>
 
-            <table> {/* Table to display incidents */}
-                <thead>
-                    <tr>
-                        <th>Incident Id</th>
-                        {/* Column for Incident ID */}
-                        <th>Severity</th> {/* Column for Severity */}
-                        <th>Timestamp</th> {/* Column for Timestamp */}
-                        <th>Location</th> {/* Column for Location */}
-                        <th>Status</th> {/* Column for Status */}
-                        <th>Action</th> {/* Column for Action buttons */}
-                    </tr>
-                </thead>
-                <tbody>
-                    {currentItems.map((incident) => ( // Map through current items to display each incident
-                        <tr className="incident-row" key={incident.id}> {/* Row for each incident */}
-                            <td>{incident.id}</td> {/* Display Incident ID */}
-                            <td>{incident.severity}</td> {/* Display Severity */}
-                            <td>{incident.timestamp}</td> {/* Display Timestamp */}
-                            <td>
-                                {typeof incident.location === 'object' ? 
-                                    `${incident.location._lat}, ${incident.location._long}` : 
-                                    incident.location} {/* Display Location coordinates */}
-                            </td>
-                            <td>
-                                <span className={`status-text status-${incident.status.toLowerCase()}`}> {/* Display status with styling */}
-                                    {incident.status} {/* Display Status */}
-                                </span>
-                            </td>
-                            <td>
-                                {incident.status === 'Flagged' ? ( // Conditional rendering based on status
-                                    <button className="validate-button" onClick={() => handleValidate(incident)}>
-                                        Validate {/* Button to validate flagged incident */}
-                                    </button>
-                                ) : incident.status === 'Declined' ? (
-                                    <button className="view-button" onClick={() => handleDeclinedView(incident)}>
-                                        View {/* Button to view declined incident */}
-                                    </button>
-                                ) : incident.status === 'Accepted' || incident.status === 'Resolved' ? (
-                                    <button className="view-button" onClick={() => handleView(incident)}>
-                                        View {/* Button to view accepted or resolved incident */}
-                                    </button>
-                                ) : (
-                                    <span>N/A</span> // Display N/A if no actions are available
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+<table> {/* Table to display incidents */}
+    <thead>
+        <tr>
+            <th>Incident Id</th> {/* Column for Incident ID */}
+            <th>Severity</th> {/* Column for Severity */}
+            <th>Timestamp</th> {/* Column for Timestamp */}
+            <th>Location</th> {/* Column for Location */}
+            <th>Status</th> {/* Column for Status */}
+            <th>Action</th> {/* Column for Action buttons */}
+        </tr>
+    </thead>
+    <tbody>
+        {searchedItems.length > 0 ? (
+            searchedItems.map((incident) => ( // Map through searched items to display each incident
+                <tr className="incident-row" key={incident.id}> {/* Row for each incident */}
+                    <td>{incident.id}</td> {/* Display Incident ID */}
+                    <td>{incident.severity}</td> {/* Display Severity */}
+                    <td>{incident.timestamp}</td> {/* Display Timestamp */}
+                    <td>
+                        {typeof incident.location === 'object' ? 
+                            `${incident.location._lat}, ${incident.location._long}` : 
+                            incident.location} {/* Display Location coordinates */}
+                    </td>
+                    <td>
+                        <span className={`status-text status-${incident.status.toLowerCase()}`}> {/* Display status with styling */}
+                            {incident.status} {/* Display Status */}
+                        </span>
+                    </td>
+                    <td>
+                        {incident.status === 'Flagged' ? ( // Conditional rendering based on status
+                            <button className="validate-button" onClick={() => handleValidate(incident)}>
+                                Validate {/* Button to validate flagged incident */}
+                            </button>
+                        ) : incident.status === 'Declined' ? (
+                            <button className="view-button" onClick={() => handleDeclinedView(incident)}>
+                                View {/* Button to view declined incident */}
+                            </button>
+                        ) : incident.status === 'Accepted' || incident.status === 'Resolved' ? (
+                            <button className="view-button" onClick={() => handleView(incident)}>
+                                View {/* Button to view accepted or resolved incident */}
+                            </button>
+                        ) : (
+                            <span>N/A</span> // Display N/A if no actions are available
+                        )}
+                    </td>
+                </tr>
+            ))
+        ) : (
+            <tr>
+                <td colSpan="6">No incidents found matching your search criteria.</td> {/* Message if no incidents match the search */}
+            </tr>
+        )}
+    </tbody>
+</table>
 
             {/* QR Code Modal for sharing location */}
             {qrCodeModal && ( // Conditional rendering for QR code modal
@@ -429,7 +482,7 @@ const AlertNotification = () => {
                         <img src={selectedNotification.image} alt="Notification" className="modal-image" onClick={(e) => toggleFullscreen(e.target)} /> {/* Display notification image */}
                         <div className="modal-buttons"> {/* Container for modal buttons */}
                             <button className="accept-button" onClick={() => handleAccept(selectedNotification.id)}>Accept</button> {/* Accept button */}
-                            <button className="decline-button" onClick={() => handleDecline(selectedNotification.id)}>Decline</button> {/* Decline button */}
+                            <button className="decline-button" onClick={() => setDeclineReasonModal(true)}>Decline</button> {/* Decline button */}
                         </div>
                         <div className="map-container"> {/* Container for location map */}
                             <h4>Location Map:</h4> {/* Title for map section */}
@@ -449,6 +502,10 @@ const AlertNotification = () => {
                     </div>
                 </div>
             )}
+
+
+
+
 
             {/* Declined Modal for selected notification */}
             {selectedNotification && declinedModal && ( // Conditional rendering for declined modal
@@ -478,6 +535,11 @@ const AlertNotification = () => {
                 </div>
             )}
 
+
+
+
+
+
    {/* View Modal for Accepted Notifications */}
 {selectedNotification && viewModal && selectedNotification.status === "Accepted" && ( // Conditional rendering for view modal of accepted notifications
     <div className="modal-overlay"> {/* Overlay for modal */}
@@ -489,7 +551,7 @@ const AlertNotification = () => {
                 onClick={(e) => toggleFullscreen(e.target)} 
             /> {/* Display notification image */}
             <div className="modal-buttons"> {/* Container for modal buttons */}
-                <button className="decline-button" onClick={() => handleDecline(selectedNotification.id)}>Decline</button> {/* Decline button */}
+                <button className="decline-button" onClick={() => { setDeclineReasonModal(true)}}>Decline</button> {/* Decline button */}
                 <button className="resolve-button" onClick={() => handleResolve(selectedNotification.id)}>Resolve</button> {/* Resolve button */}
                 <button className="share-button" onClick={() => handleShareLocation(selectedNotification.location)}>Share Location</button> {/* Share Location button */}
             </div>
@@ -535,7 +597,62 @@ const AlertNotification = () => {
                     </div>
                 </div>
             )}
+
+
+
+{declineReasonModal && (
+    <div className="modal-overlay">
+        <div className="modal decline-reason-modal">
+            <button className="close-button" onClick={closeModal}>×</button>
+            <h3>Decline Incident #{selectedNotification?.id}</h3>
+            
+            <div className="form-group">
+                <label>Reason for Declining:</label>
+                <textarea
+                    value={declineReason}
+                    onChange={(e) => setDeclineReason(e.target.value)}
+                    placeholder="Please specify why you're declining this incident..."
+                    autoFocus
+                />
+            </div>
+
+            <div className="quick-reasons">
+                <p>Common Reasons:</p>
+                <button onClick={() => setDeclineReason("The image is blurred or unclear")}>
+                    Blurry/Unclear Image
+                </button>
+                <button onClick={() => setDeclineReason("Not a valid emergency situation")}>
+                    Not an Emergency
+                </button>
+                <button onClick={() => setDeclineReason("Insufficient information provided")}>
+                    Insufficient Info
+                </button>
+            </div>
+
+            <div className="action-buttons">
+                <button 
+                    className="submit-btn"
+                    onClick={() => {
+                        handleDecline(selectedNotification.id);
+                        setDeclineReasonModal(false);
+                    }}
+                    disabled={!declineReason.trim()}
+                >
+                    Submit Decline
+                </button>
+                <button className="cancel-btn" onClick={closeModal}>
+                    Cancel
+                </button>
+            </div>
         </div>
+    </div>
+)}
+
+
+
+        </div>
+
+        
     );
 };
 

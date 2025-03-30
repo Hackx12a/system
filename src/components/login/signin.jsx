@@ -1,45 +1,87 @@
-import React, { useEffect, useState } from 'react'; // Import necessary React hooks
-import { useNavigate } from 'react-router-dom'; // Import navigation hook from react-router
-import { motion } from 'framer-motion'; // Import motion for animations
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import eye icons for password visibility toggle
-import { auth } from './firebase'; // Import Firebase authentication instance
-import { signInWithEmailAndPassword } from 'firebase/auth'; // Import sign-in function from Firebase
-import './signin.css'; // Import CSS for styling
-import logo from './assets/helptrack.png'; // Import logo image
-import backgroundImage from './assets/qwe.jpg'; // Import background image
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { auth, db } from './firebase'; // Make sure to export db from your firebase config
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { collection, query, where, getDocs } from 'firebase/firestore'; // Add Firestore imports
+import './signin.css';
+import logo from './assets/helptrack.png';
+import backgroundImage from './assets/qwe.jpg';
 
 const Login = ({ setIsAuthenticated }) => {
-  // State variables to manage email, password, error messages, and password visibility
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate(); // Initialize the navigate function
+  const navigate = useNavigate();
 
-  // Effect to check authentication status on component mount
   useEffect(() => {
-    const authStatus = sessionStorage.getItem('isAuthenticated'); // Retrieve authentication status from sessionStorage
+    const authStatus = sessionStorage.getItem('isAuthenticated');
+    const role = sessionStorage.getItem('role');
     
-    // If user is already authenticated, redirect to home page
     if (authStatus === 'true') {
-      navigate('/');
+      // Redirect based on role if already authenticated
+      role === 'admin' ? navigate('/admin') : navigate('/');
     }
   }, [navigate]);
 
-  // Function to handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
     try {
-      // Attempt to sign in with provided email and password
-      await signInWithEmailAndPassword(auth, email, password);
-      sessionStorage.setItem('isAuthenticated', 'true'); // Set authentication status in sessionStorage
-      sessionStorage.setItem('email', email); // Store the email in sessionStorage
-      setIsAuthenticated(true); // Update parent component's authentication state
-      navigate('/', { state: { email } }); // Navigate to home page and pass email as state
+      // 1. Authenticate with Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // 2. Query Firestore for user document with matching email
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        throw new Error('No user found with this email');
+      }
+      
+      // 3. Get user data
+      const userDoc = querySnapshot.docs[0];
+      const userData = userDoc.data();
+      
+      // Validate that role exists in user data
+      if (!userData.role) {
+        throw new Error('User role not defined');
+      }
+      
+      // 4. Store authentication state and role
+      sessionStorage.setItem('isAuthenticated', 'true');
+      sessionStorage.setItem('email', email);
+      sessionStorage.setItem('role', userData.role);
+      sessionStorage.setItem('uid', userCredential.user.uid);
+      
+      // Call setIsAuthenticated with the role information
+      setIsAuthenticated(userData.role);
+      
+      // 5. Redirect based on role
+      if (userData.role === 'admin') {
+        navigate('/admin', { replace: true }); // replace: true prevents going back to login
+      } else {
+        navigate('/', { replace: true });
+      }
+      
     } catch (error) {
-      // If an error occurs, set error message and log error
-      setError('Invalid email or password. Please try again.');
+      // Clear password field on error
+      setPassword('');
+      
+      // Set appropriate error message
+      if (error.code === 'auth/invalid-credential') {
+        setError('Invalid email or password. Please try again.');
+      } else if (error.message === 'No user found with this email') {
+        setError('Account not found. Please check your email.');
+      } else if (error.message === 'User role not defined') {
+        setError('Account configuration error. Please contact support.');
+      } else {
+        setError('Login failed. Please try again later.');
+      }
+      
       console.error("Login error:", error);
     }
   };

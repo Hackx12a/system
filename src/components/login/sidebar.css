@@ -112,7 +112,7 @@
   }
 
   .sidebar-closed {
-    width: 60px; /* Adjusted width when closed, showing only icons */
+    width: 89px; /* Adjusted width when closed, showing only icons */
   }
 
   .sidebar-links li svg {
