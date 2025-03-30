@@ -435,36 +435,45 @@ const handleDeleteMessage = async (messageId, email) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredIncidents.length > 0 ? (
-                    filteredIncidents.map((incident) => (
-                      <tr key={incident.id}>
-                        <td>{incident.id}</td>
-                        <td>
-                          <span className={`badge ${getSeverityBadgeClass(incident.severity)}`}>
-                            {incident.severity}
-                          </span>
-                        </td>
-                        <td>{incident.formattedDate}</td>
-                        <td>{incident.formattedLocation}</td>
-                        <td>{incident.status}</td>
-                        <td>
-                          <button
-                            className="action-button view-button"
-                            onClick={() => handleViewIncident(incident)}
-                          >
-                            <FaEye className="button-icon" /> View
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="no-results">
-                        No incidents found
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
+  {filteredIncidents.length > 0 ? (
+    filteredIncidents.map((incident) => (
+      <tr key={incident.id}>
+        <td>{incident.id}</td>
+        <td>
+          <span className={`badge ${getSeverityBadgeClass(incident.severity)}`}>
+            {incident.severity}
+          </span>
+        </td>
+        <td>{incident.formattedDate}</td>
+        <td>
+        <a 
+  href={`https://www.google.com/maps?q=${incident.location._lat},${incident.location._long}`} 
+  target="_blank" 
+  rel="noopener noreferrer"
+>
+  {incident.formattedLocation}
+</a>
+
+        </td>
+        <td>{incident.status}</td>
+        <td>
+          <button
+            className="action-button view-button"
+            onClick={() => handleViewIncident(incident)}
+          >
+            <FaEye className="button-icon" /> View
+          </button>
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="6" className="no-results">
+        No incidents found
+      </td>
+    </tr>
+  )}
+</tbody>
               </table>
             )}
           </div>
